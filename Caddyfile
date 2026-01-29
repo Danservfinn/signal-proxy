@@ -4,9 +4,9 @@
 :8080 {
     # Health check endpoint
     # Moltbot calls: /api/v1/check
-    # signal-cli-rest-api provides: /v1/health
+    # signal-cli-rest-api provides: /v1/about (not /v1/health which doesn't exist)
     handle /api/v1/check {
-        rewrite * /v1/health
+        rewrite * /v1/about
         reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
             header_up Host {upstream_hostport}
             header_up X-Forwarded-Host {host}
