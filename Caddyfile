@@ -52,6 +52,13 @@
         }
     }
 
+    # RPC endpoint stub - signal-cli-rest-api doesn't have RPC
+    # Return a JSON stub response for Moltbot compatibility
+    handle /api/v1/rpc {
+        header Content-Type application/json
+        respond `{"jsonrpc":"2.0","result":null,"id":null}` 200
+    }
+
     # Catch-all for /api/v1/* - rewrite to /v1/* and proxy
     # This handles any Moltbot API calls not explicitly mapped above
     handle /api/v1/* {
