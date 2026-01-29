@@ -52,9 +52,20 @@
         }
     }
 
-    # Default handler
+    # Catch-all for /api/v1/* - rewrite to /v1/* and proxy
+    # This handles any Moltbot API calls not explicitly mapped above
+    handle /api/v1/* {
+        uri strip_prefix /api
+        reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
+            header_up Host {upstream_hostport}
+            header_up X-Forwarded-Host {host}
+        }
+    }
+
+    # Default handler - return JSON for API compatibility
     handle {
-        respond "Signal API Proxy" 200
+        header Content-Type application/json
+        respond `{"status":"ok","service":"signal-api-proxy"}` 200
     }
 
     log {
