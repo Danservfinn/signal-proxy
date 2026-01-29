@@ -1,0 +1,68 @@
+# Signal API Adapter for Moltbot
+# Translates Moltbot's expected API format to signal-cli-rest-api format
+
+:8080 {
+    # Health check endpoint
+    # Moltbot calls: /api/v1/check
+    # signal-cli-rest-api provides: /v1/health
+    handle /api/v1/check {
+        rewrite * /v1/health
+        reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
+            header_up Host {upstream_hostport}
+            header_up X-Forwarded-Host {host}
+        }
+    }
+
+    # Events/receive endpoint
+    # Moltbot calls: /api/v1/events?account=+15165643945
+    # signal-cli-rest-api provides: /v1/receive/+15165643945
+    handle /api/v1/events {
+        # Extract account from query parameter and rewrite to path
+        @hasAccount query account=*
+        handle @hasAccount {
+            rewrite * /v1/receive/{query.account}
+            reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
+                header_up Host {upstream_hostport}
+                header_up X-Forwarded-Host {host}
+            }
+        }
+    }
+
+    # Send message endpoint
+    # Moltbot calls: /api/v1/send
+    # signal-cli-rest-api provides: /v2/send
+    handle /api/v1/send {
+        rewrite * /v2/send
+        reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
+            header_up Host {upstream_hostport}
+            header_up X-Forwarded-Host {host}
+        }
+    }
+
+    # Pass through any other v1 requests
+    handle /v1/* {
+        reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
+            header_up Host {upstream_hostport}
+            header_up X-Forwarded-Host {host}
+        }
+    }
+
+    # Pass through any other v2 requests
+    handle /v2/* {
+        reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
+            header_up Host {upstream_hostport}
+            header_up X-Forwarded-Host {host}
+        }
+    }
+
+    # Default handler
+    handle {
+        respond "Signal API Proxy" 200
+    }
+
+    log {
+        output stdout
+        format console
+        level INFO
+    }
+}
