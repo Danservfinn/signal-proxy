@@ -16,17 +16,12 @@
     # Events/receive endpoint
     # Moltbot calls: /api/v1/events?account=+15165643945
     # signal-cli-rest-api provides: /v1/receive/+15165643945
+    # Note: Using direct path rewrite since there's only one account
     handle /api/v1/events {
-        # Extract account from query parameter and rewrite to path
-        @hasAccount query account=*
-        handle @hasAccount {
-            rewrite * /v1/receive/{query.account}
-            # Fix URL encoding: + gets decoded to space, convert back
-            uri replace " " "+"
-            reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
-                header_up Host {upstream_hostport}
-                header_up X-Forwarded-Host {host}
-            }
+        rewrite * /v1/receive/%2B15165643945
+        reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
+            header_up Host {upstream_hostport}
+            header_up X-Forwarded-Host {host}
         }
     }
 
