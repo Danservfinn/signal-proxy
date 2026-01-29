@@ -13,7 +13,7 @@
         }
     }
 
-    # Events/receive endpoint
+    # Events/receive endpoint (supports SSE streaming)
     # Moltbot calls: /api/v1/events?account=+15165643945
     # signal-cli-rest-api provides: /v1/receive/+15165643945
     # Note: Using direct path rewrite since there's only one account
@@ -22,6 +22,10 @@
         reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
             header_up Host {upstream_hostport}
             header_up X-Forwarded-Host {host}
+            flush_interval -1
+            transport http {
+                read_timeout 0
+            }
         }
     }
 
