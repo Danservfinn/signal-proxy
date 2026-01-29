@@ -21,6 +21,8 @@
         @hasAccount query account=*
         handle @hasAccount {
             rewrite * /v1/receive/{query.account}
+            # Fix URL encoding: + gets decoded to space, convert back
+            uri replace " " "+"
             reverse_proxy https://signal-cli-rest-api-production-010a.up.railway.app {
                 header_up Host {upstream_hostport}
                 header_up X-Forwarded-Host {host}
